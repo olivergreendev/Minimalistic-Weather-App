@@ -60,12 +60,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
     let apiKey = "5c7324600085619e5ab51952cb5ceee0"
     
     var currentCondition = ""
-    var hourlyTemp = "3°"
+    var hourlyTemp = "??°"
     var currentCity = ""
     
-    var dayTemp: UILabel! = nil
+    //var dayTemp: UILabel! = nil
     
     var tempArray: [String] = ["0", "1", "2", "3", "4"]
+    
+    var hourlyTempLabels: [UILabel] = []
+    var hourlyWeatherImages: [UIImageView] = []
     
     
     override func viewDidLoad() {
@@ -87,13 +90,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
         currentTemp.text = "??°C"
         
         adjustInitialPositions(shift: 0)
-        //initScrollView(state: false)
+        initScrollView(state: false)
         
         searchBar.layer.cornerRadius = 20
         searchBar.backgroundColor = UIColor(red: 76/255.0, green: 46/255.0, blue: 137/255.0, alpha: 1.0)
         searchBar.frame.size.height = 40
         
-        if getTime() >= 17 {
+        if getTime() >= 17 || getTime() <= 7 {
             setLargeWeatherImage(condition: "Clear", time: "Night")
         } else {
             setLargeWeatherImage(condition: "Clear", time: "Day")
@@ -133,7 +136,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     }
                 
                     // this sets the last dayTemp label correctly because its actually the only UILabel that's initiated in initScrollView
-                    self.dayTemp.text = self.hourlyTemp
+                    //dayTemp.text = self.hourlyTemp
+                    for i in 0...4 {
+                        self.hourlyTempLabels[i].text = self.hourlyTemp
+                        self.hourlyWeatherImages[i].image = #imageLiteral(resourceName: "cloudy-small")
+                    }
                 }
                     
                 catch let jsonError as NSError {
@@ -301,10 +308,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
             for hourShift in 0...4 {
                 
-                let hourLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
-                let weatherImage = UIImage(named: "clear-day-small")
-                let weatherImageView = UIImageView(image: weatherImage!)
-                dayTemp = UILabel(frame: CGRect(x: 0, y: 0, width: 50, height: 20))
+                var hourLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+                var weatherImage = UIImage(named: "clear-day-small")
+                var weatherImageView = UIImageView(image: weatherImage!)
+                var dayTemp = UILabel(frame: CGRect(x: 0, y: 0, width: 50, height: 20))
+                
+                hourlyTempLabels.append(dayTemp)
+                hourlyWeatherImages.append(weatherImageView)
                 
                 hourLabel.center = CGPoint(x: CGFloat(xPos), y: CGFloat(25) - 20)
                 hourLabel.textAlignment = .center
@@ -349,8 +359,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     hourLabel.alpha = 1.0
                     weatherImageView.center.y += 20
                     weatherImageView.alpha = 1.0
-                    self.dayTemp.center.y += 20
-                    self.dayTemp.alpha = 1.0
+                    dayTemp.center.y += 20
+                    dayTemp.alpha = 1.0
                     
                 }), completion: { (finished: Bool) in })
             }
@@ -358,8 +368,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
             // update the hourly labels
             // update the hourly images
             // update the hourly temps
+            
+            // create an array of UILabels
+            // reference each UILabel using a for loop
+            
             for i in 0...4 {
-                self.dayTemp.text = tempArray[i]
+                
             }
         }
     }
