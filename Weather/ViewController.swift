@@ -69,6 +69,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     var hourlyTempLabels: [UILabel] = []
     var hourlyWeatherImages: [UIImageView] = []
+    var hourlyTimeLabels: [UILabel] = []
     
     
     override func viewDidLoad() {
@@ -122,24 +123,22 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     self.currentStatus.text = String("\((weather["weather"]![0]! as! [String: AnyObject])["main"]!)")
                     self.currentTemp.text = String("\(Int(weather["main"]!["temp"]!! as! Double - 273.14))°C")
                     self.hourlyTemp = String("\(Int(weather["main"]!["temp"]!! as! Double - 273.14))°")
-                    
                     var currentCondition = String(describing: (weather["weather"]![0]! as! [String: AnyObject])["main"]!)
                     
-                    if (self.getTime() >= 17) {
+                    if (self.getTime() >= 17 || self.getTime() <= 7) {
                         self.setLargeWeatherImage(condition: currentCondition, time: "Night")
                     } else {
                         self.setLargeWeatherImage(condition: currentCondition, time: "Day")
                     }
                     
                     for i in 0...4 {
-                        self.tempArray[i] = self.hourlyTemp
-                    }
-                
-                    // this sets the last dayTemp label correctly because its actually the only UILabel that's initiated in initScrollView
-                    //dayTemp.text = self.hourlyTemp
-                    for i in 0...4 {
                         self.hourlyTempLabels[i].text = self.hourlyTemp
-                        self.hourlyWeatherImages[i].image = #imageLiteral(resourceName: "cloudy-small")
+                        
+                        if (self.getTime() >= 17 || self.getTime() <= 7) {
+                            self.hourlyWeatherImages[i].image = self.setWeatherImage(condition: currentCondition, time: "Night")
+                        } else {
+                            self.hourlyWeatherImages[i].image = self.setWeatherImage(condition: currentCondition, time: "Day")
+                        }
                     }
                 }
                     
@@ -154,17 +153,71 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func getTime() -> Int {
         
-        var date = Date()
-        var calendar = Calendar.current
-        var currentHour = calendar.component(.hour, from: date)
+        let date = Date()
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: date)
         
         return currentHour
     }
     
+    func setWeatherImage(condition: String, time: String) -> UIImage {
+        
+        var image: UIImage = #imageLiteral(resourceName: "clear-day-small")
+        
+        switch (condition) {
+            
+        case "Thunderstorm":
+            if (time == "Day") {
+                image = #imageLiteral(resourceName: "thunder-day-small")
+            } else if (time == "Night") {
+                image = #imageLiteral(resourceName: "thunder-night-small")
+            }
+            break
+        case "Drizzle":
+            if (time == "Day") {
+                image = #imageLiteral(resourceName: "rain-day-small")
+            } else if (time == "Night") {
+                image = #imageLiteral(resourceName: "rain-night-small")
+            }
+            break
+        case "Rain":
+            if (time == "Day") {
+                image = #imageLiteral(resourceName: "rain-day-small")
+            } else if (time == "Night") {
+                image = #imageLiteral(resourceName: "rain-night-small")
+            }
+            break
+        case "Snow":
+            image = #imageLiteral(resourceName: "cloudy-small")
+            break
+        case "Mist":
+            image = #imageLiteral(resourceName: "cloudy-small")
+            break
+        case "Clear":
+            if (time == "Day") {
+                image = #imageLiteral(resourceName: "clear-day-small")
+            } else if (time == "Night") {
+                image = #imageLiteral(resourceName: "clear-night-small")
+            }
+            break
+        case "Clouds":
+            image = #imageLiteral(resourceName: "cloudy-small")
+            break
+        case "Fog":
+            image = #imageLiteral(resourceName: "cloudy-small")
+            break
+        default:
+            print("not catering for a certain weather condition; cannot assign an image to \(condition)")
+            break
+        }
+        
+        return image
+    }
+    
     func setLargeWeatherImage(condition: String, time: String) {
         
-        var xPos = self.view.frame.width / 2
-        var yPos = self.view.frame.height / 2
+        let xPos = self.view.frame.width / 2
+        let yPos = self.view.frame.height / 2
         
         switch (condition) {
             
@@ -315,6 +368,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 
                 hourlyTempLabels.append(dayTemp)
                 hourlyWeatherImages.append(weatherImageView)
+                hourlyTimeLabels.append(hourLabel)
                 
                 hourLabel.center = CGPoint(x: CGFloat(xPos), y: CGFloat(25) - 20)
                 hourLabel.textAlignment = .center
@@ -374,6 +428,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
             for i in 0...4 {
                 
+                var newTime = (currentHour + i)
+                
+                if (newTime > 23) {
+                    newTime = (0 + counter)
+                    counter += 1 // was 1
+                }
+                
+                timeArray[i] = newTime
+                
+                //hourlyTempLabels[i].text = String(timeArray[i])
+                //hourlyWeatherImages[i].image = SOME_IMAGE // this can individually change the image of each hour each iteration
+                hourlyTimeLabels[i].text = String(timeArray[i])
             }
         }
     }
